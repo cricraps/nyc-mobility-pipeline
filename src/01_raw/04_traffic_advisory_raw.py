@@ -9,14 +9,12 @@
 # Grain   one advisory entry per scrape date
 # Output  nyc_mobility.raw.traffic_advisory
 # Next    src/02_clean/04_traffic_advisory_clean
+# Note    the %pip cell below is all that is needed on serverless. Do not add
+#         dbutils.library.restartPython(), it hangs and Run all never finishes.
 
 # COMMAND ----------
 
 # MAGIC %pip install beautifulsoup4 --quiet
-
-# COMMAND ----------
-
-dbutils.library.restartPython()
 
 # COMMAND ----------
 
