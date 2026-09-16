@@ -4,6 +4,14 @@
 # environment_version = "5"
 # ///
 # DBTITLE 1,Traffic advisory
+# TRAFFIC ADVISORY, RAW
+# Source  nyc.gov/html/dot/html/motorist/weektraf.shtml, HTML, current week only, no archive
+# Grain   one advisory entry per scrape date
+# Output  nyc_mobility.raw.traffic_advisory
+# Next    src/02_clean/04_traffic_advisory_clean
+
+# COMMAND ----------
+
 # MAGIC %pip install beautifulsoup4 --quiet
 
 # COMMAND ----------
@@ -27,8 +35,12 @@ from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 DOT_URL = "https://www.nyc.gov/html/dot/html/motorist/weektraf.shtml"
 USER_AGENT = "FTW-B12-DE-coursework/1.0 (student project)"
 
-# Landed HTML goes beside the other group sources so the parse can be re-run without re-fetching.
-LANDING_DIR = "/Volumes/workspace/default/ftw-b12-r2/groups/week-08/group-f/traffic_advisory"
+# Landed HTML goes beside the other group sources so the parse can be re-run without
+# re-fetching. The class volume is mounted under a different name in each of our
+# workspaces, ftw-b12-de in mine and ftw-b12-r2 in the paths Crizza used, so this is the
+# one line to change per workspace. Nothing else here depends on the location.
+LANDING_VOLUME = "/Volumes/workspace/default/ftw-b12-de"
+LANDING_DIR = f"{LANDING_VOLUME}/groups/week09/traffic_advisory"
 
 TABLE_NAME = "nyc_mobility.raw.traffic_advisory"
 
