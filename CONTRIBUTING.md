@@ -2,7 +2,7 @@
 
 ## What this is for
 
-This doc explains how our team works together on this pipeline — how to branch, where data goes, how tables and columns are named, and who's responsible for each part. Read this before opening a branch or touching a shared table, so we all stay consistent and nobody overwrites someone else's work.
+This doc explains how our team works together on this pipeline — how to branch, where data goes, how tables and columns are named, and who's responsible for each part. 
 
 ---
 
@@ -11,7 +11,7 @@ This doc explains how our team works together on this pipeline — how to branch
 1. **Pick up an issue** from the board and confirm you're the assigned owner (see "Who owns what" below).
 2. **Work in your own Databricks Git folder.** Each engineer has a personal folder synced to their own branch — never edit inside someone else's folder.
 3. **Create a branch** for your task using the naming pattern below, and keep it scoped to one dataset/task.
-4. **Build and test in your folder** (Bronze → Silver → validation → Mart, depending on your area) before merging anything into shared notebooks.
+4. **Build and test in your folder** (Raw → Clean → validation → Mart, depending on your area) before merging anything into shared notebooks.
 5. **Open a PR back to `main`** once your notebook runs cleanly end-to-end; note what changed and what you tested.
 6. **Review before merge** — no direct pushes to `main`.
 
@@ -121,7 +121,7 @@ Keep original source column names in `raw` — apply naming conventions starting
 | Garett | Green Taxi Dataset |
 | Anje | Weather Dataset |
 | Kinah | Traffic Dataset|
-| Cha | Taxi Zones & Gold |
+| Cha | Taxi Zones & Gold fact-dim |
 | Mia & Anje | Data quality & dashboard |
 
 ---
@@ -129,8 +129,8 @@ Keep original source column names in `raw` — apply naming conventions starting
 ## Security
 
 **Never commit:**
-- Databricks tokens, API keys, or any credentials (including the weather/traffic API keys)
-- Passwords or secrets of any kind (R2)
+- Databricks tokens, API keys, or any credentials (including the weather/traffic API keys/R2)
+- Passwords or secrets of any kind
 - Raw downloaded datasets — pull from the shared Volume path instead of committing local copies
 - Notebook output cells that might expose tokens, secrets, or internal paths
 
