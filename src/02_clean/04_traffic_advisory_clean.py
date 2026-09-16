@@ -4,6 +4,11 @@
 # environment_version = "5"
 # ///
 # DBTITLE 1,Traffic advisory
+# TRAFFIC ADVISORY, CLEAN
+# Source  nyc_mobility.raw.traffic_advisory
+# Grain   one advisory, Type 2 history across the weekly scrapes
+# Output  nyc_mobility.clean.traffic_advisory
+# Before  run src/01_raw/04_traffic_advisory_raw first
 from pyspark.sql import functions as F
 
 RAW_TABLE = "nyc_mobility.raw.traffic_advisory"
