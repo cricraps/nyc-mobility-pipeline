@@ -1,24 +1,23 @@
 # Contributing to NYC Mobility Pipeline
 
-## 📖 What this is for
+## What this is for
 
 This doc explains how our team works together on this pipeline — how to branch, where data goes, how tables and columns are named, and who's responsible for each part. Read this before opening a branch or touching a shared table, so we all stay consistent and nobody overwrites someone else's work.
 
 ---
 
-## 🔄 Project workflow
+## Project workflow
 
 1. **Pick up an issue** from the board and confirm you're the assigned owner (see "Who owns what" below).
 2. **Work in your own Databricks Git folder.** Each engineer has a personal folder synced to their own branch — never edit inside someone else's folder.
 3. **Create a branch** for your task using the naming pattern below, and keep it scoped to one dataset/task.
 4. **Build and test in your folder** (Bronze → Silver → validation → Mart, depending on your area) before merging anything into shared notebooks.
 5. **Open a PR back to `main`** once your notebook runs cleanly end-to-end; note what changed and what you tested.
-6. **Databricks Workflows/orchestration** (owned by Crizza) picks up merged notebooks for scheduled runs — don't wire your own ad-hoc scheduling outside of it.
-7. **Review before merge** — no direct pushes to `main`.
+6. **Review before merge** — no direct pushes to `main`.
 
 ---
 
-## 🌿 Branch names
+## Branch names
 
 | Branch | What it's for |
 |---|---|
@@ -34,7 +33,7 @@ This doc explains how our team works together on this pipeline — how to branch
 
 ---
 
-## 📦 Where raw files go
+## Where raw files go
 
 Raw source files land in the shared Databricks Volume, organized by group and source:
 
@@ -51,7 +50,7 @@ Keep the same `groups/week-08/group-f/<source>/` structure for any new files.
 
 ---
 
-## 🔗 Referencing tables
+## Referencing tables
 
 Always use the full path: `catalog.schema.table`.
 
@@ -63,7 +62,7 @@ Don't rely on a `USE CATALOG` / `USE SCHEMA` set earlier in a notebook — spell
 
 ---
 
-## 🗂️ Table names
+## Table names
 
 Catalog: `nyc_mobility`
 
@@ -86,7 +85,7 @@ weather
 
 ---
 
-## ✅ Approved catalog & workspace path
+## Approved catalog & workspace path
 
 - **Approved catalog:** `nyc_mobility` — this is the only catalog this project should write to. Don't create new catalogs.
 - **Approved workspace/volume path** for raw file drops:
@@ -97,7 +96,7 @@ weather
 
 ---
 
-## 🏷️ Column naming
+## Column naming
 
 Lowercase `snake_case`, with these suffixes:
 
@@ -114,28 +113,27 @@ Keep original source column names in `raw` — apply naming conventions starting
 
 ---
 
-## 👤 Who owns what
+## Who owns what
 
 | Owner | Area |
 |---|---|
-| Crizza | Git & Databricks orchestration |
-| Garett | Green Taxi |
-| Anje | Weather |
-| Kinah | Traffic |
+| Crizza | Git & Documentation |
+| Garett | Green Taxi Dataset |
+| Anje | Weather Dataset |
+| Kinah | Traffic Dataset|
 | Cha | Taxi Zones & Gold |
 | Mia & Anje | Data quality & dashboard |
 
 ---
 
-## 🔒 Security
+## Security
 
 **Never commit:**
 - Databricks tokens, API keys, or any credentials (including the weather/traffic API keys)
-- Passwords or secrets of any kind
+- Passwords or secrets of any kind (R2)
 - Raw downloaded datasets — pull from the shared Volume path instead of committing local copies
 - Notebook output cells that might expose tokens, secrets, or internal paths
 
 **Fine to commit:**
 - Notebook/source code, SQL, documentation, and non-secret example configs
 
-If a secret is ever committed by accident, rotate/revoke it immediately and let Crizza know so history can be cleaned up — don't just delete the file in a new commit.
