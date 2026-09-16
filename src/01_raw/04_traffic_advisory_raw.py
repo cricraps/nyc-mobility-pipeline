@@ -9,6 +9,7 @@
 # Grain   one advisory entry per scrape date
 # Output  nyc_mobility.raw.traffic_advisory
 # Next    src/02_clean/04_traffic_advisory_clean
+# Volume  the class volume name differs per workspace, see CANDIDATE_VOLUMES below
 # Note    the %pip cell below is all that is needed on serverless. Do not add
 #         dbutils.library.restartPython(), it hangs and Run all never finishes.
 
@@ -34,10 +35,19 @@ DOT_URL = "https://www.nyc.gov/html/dot/html/motorist/weektraf.shtml"
 USER_AGENT = "FTW-B12-DE-coursework/1.0 (student project)"
 
 # Landed HTML goes beside the other group sources so the parse can be re-run without
-# re-fetching. The class volume is mounted under a different name in each of our
-# workspaces, ftw-b12-de in mine and ftw-b12-r2 in the paths Crizza used, so this is the
-# one line to change per workspace. Nothing else here depends on the location.
-LANDING_VOLUME = "/Volumes/workspace/default/ftw-b12-de"
+# re-fetching. The class volume is mounted under a different name in different
+# workspaces, so we pick the first one that is actually there instead of hardcoding one
+# and breaking it for everyone else. ftw-b12-r2 is the name used in 02_weather_raw.py
+# and 03_taxi_zones_raw.py, so it is tried first. Add yours to the list if it is neither.
+CANDIDATE_VOLUMES = [
+    "/Volumes/workspace/default/ftw-b12-r2",
+    "/Volumes/workspace/default/ftw-b12-de",
+]
+LANDING_VOLUME = next((v for v in CANDIDATE_VOLUMES if os.path.isdir(v)), None)
+if LANDING_VOLUME is None:
+    raise FileNotFoundError(
+        f"No class volume found. Tried {CANDIDATE_VOLUMES}. Add this workspace's name.")
+
 LANDING_DIR = f"{LANDING_VOLUME}/groups/week09/traffic_advisory"
 
 TABLE_NAME = "nyc_mobility.raw.traffic_advisory"
