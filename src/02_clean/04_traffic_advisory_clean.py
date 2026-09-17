@@ -9,6 +9,7 @@
 # Grain   one advisory, Type 2 history across the weekly scrapes
 # Output  nyc_mobility.clean.traffic_advisory
 # Before  run src/01_raw/04_traffic_advisory_raw first
+# Next    src/05_validation/04_traffic_advisory_validation for profiling and DQ checks
 from pyspark.sql import functions as F
 
 RAW_TABLE = "nyc_mobility.raw.traffic_advisory"
@@ -149,52 +150,8 @@ print(f"  Scrape dates held: {summary.scrapes_held}")
 
 # COMMAND ----------
 
-# Checks on this source only. They are written as one result set with a PASS, WARN or
-# FAIL per check so they can be read straight into the shared DQ results table once
-# Engineer 6 settles its name.
-display(spark.sql(f"""
-    WITH latest AS (SELECT MAX(scrape_date) AS d FROM {RAW_TABLE})
-    SELECT 'row_count' AS check_name,
-           'raw' AS layer,
-           COUNT(*) AS metric_value,
-           CASE WHEN COUNT(*) > 0 THEN 'PASS' ELSE 'FAIL' END AS status
-    FROM   {RAW_TABLE}
-    WHERE  scrape_date = (SELECT d FROM latest)
-
-    UNION ALL
-    -- The canary for trap 1. A parser that stops reading bare <strong> headings collapses
-    -- this number to roughly 4, and the load looks successful while losing most of the page.
-    SELECT 'location_count', 'raw', COUNT(DISTINCT location_name),
-           CASE WHEN COUNT(DISTINCT location_name) >= 20 THEN 'PASS' ELSE 'WARN' END
-    FROM   {RAW_TABLE}
-    WHERE  scrape_date = (SELECT d FROM latest)
-
-    UNION ALL
-    SELECT 'advisory_sk_unique', 'raw', COUNT(*) - COUNT(DISTINCT advisory_sk),
-           CASE WHEN COUNT(*) = COUNT(DISTINCT advisory_sk) THEN 'PASS' ELSE 'FAIL' END
-    FROM   {RAW_TABLE}
-
-    UNION ALL
-    SELECT 'closure_bk_unique', 'clean', COUNT(*) - COUNT(DISTINCT closure_bk),
-           CASE WHEN COUNT(*) = COUNT(DISTINCT closure_bk) THEN 'PASS' ELSE 'FAIL' END
-    FROM   {CLEAN_TABLE}
-
-    UNION ALL
-    SELECT 'closure_bk_not_null', 'clean', COUNT_IF(closure_bk IS NULL),
-           CASE WHEN COUNT_IF(closure_bk IS NULL) = 0 THEN 'PASS' ELSE 'FAIL' END
-    FROM   {CLEAN_TABLE}
-
-    UNION ALL
-    SELECT 'date_order', 'clean', COUNT_IF(effective_from > effective_to),
-           CASE WHEN COUNT_IF(effective_from > effective_to) = 0 THEN 'PASS' ELSE 'WARN' END
-    FROM   {CLEAN_TABLE}
-
-    UNION ALL
-    SELECT 'borough_in_domain', 'clean',
-           COUNT_IF(borough NOT IN ('Manhattan', 'Brooklyn', 'Queens', 'Bronx',
-                                    'Staten Island', 'Crossings')),
-           CASE WHEN COUNT_IF(borough NOT IN ('Manhattan', 'Brooklyn', 'Queens', 'Bronx',
-                                              'Staten Island', 'Crossings')) = 0
-                THEN 'PASS' ELSE 'WARN' END
-    FROM   {CLEAN_TABLE}
-"""))
+# Profiling and the data quality checks moved to
+# src/05_validation/04_traffic_advisory_validation so all six sources write the same
+# columns into nyc_mobility.validation and Engineer 6 can union them for the dashboard.
+# Run that notebook after this one.
+print("Next: src/05_validation/04_traffic_advisory_validation")
