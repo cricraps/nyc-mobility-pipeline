@@ -128,6 +128,27 @@
         "GROUP BY borough, advisory_type\r\n",
         "ORDER BY borough, advisory_type;"
       ]
+    },
+    {
+      "name": "9670f773",
+      "displayName": "kpi_summary",
+      "config": {
+        "version": "1.1",
+        "source": "nyc_mobility.bi_visualization.kpi_summary",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
     }
   ],
   "pages": [
@@ -882,7 +903,7 @@
           "position": {
             "x": 0,
             "y": 2,
-            "width": 3,
+            "width": 2,
             "height": 4
           }
         },
@@ -925,9 +946,9 @@
             }
           },
           "position": {
-            "x": 3,
+            "x": 2,
             "y": 2,
-            "width": 3,
+            "width": 2,
             "height": 4
           }
         },
@@ -938,14 +959,14 @@
               {
                 "name": "main_query",
                 "query": {
-                  "datasetName": "6b8fd6f1",
+                  "datasetName": "9670f773",
                   "fields": [
                     {
-                      "name": "avg(avg_fare_amount)",
-                      "expression": "AVG(`avg_fare_amount`)"
+                      "name": "avg_fare_usd",
+                      "expression": "`avg_fare_usd`"
                     }
                   ],
-                  "disaggregated": false
+                  "disaggregated": true
                 }
               }
             ],
@@ -953,7 +974,7 @@
               "frame": {
                 "showTitle": true,
                 "title": {
-                  "value": "Average fare",
+                  "value": "Average fare in $",
                   "fields": []
                 }
               },
@@ -961,7 +982,7 @@
               "widgetType": "counter",
               "encodings": {
                 "value": {
-                  "fieldName": "avg(avg_fare_amount)"
+                  "fieldName": "avg_fare_usd"
                 }
               },
               "data": {
@@ -970,9 +991,9 @@
             }
           },
           "position": {
-            "x": 6,
+            "x": 4,
             "y": 2,
-            "width": 3,
+            "width": 2,
             "height": 4
           }
         },
@@ -983,7 +1004,52 @@
               {
                 "name": "main_query",
                 "query": {
-                  "datasetName": "6b8fd6f1",
+                  "datasetName": "9670f773",
+                  "fields": [
+                    {
+                      "name": "avg(avg_distance_miles)",
+                      "expression": "AVG(`avg_distance_miles`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Average distance in miles",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg(avg_distance_miles)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 2,
+            "width": 2,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "90c50402",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "9670f773",
                   "fields": [
                     {
                       "name": "avg(avg_duration_minutes)",
@@ -998,7 +1064,7 @@
               "frame": {
                 "showTitle": true,
                 "title": {
-                  "value": "Average duration in minutes",
+                  "value": "Average trip duration in minutes",
                   "fields": []
                 }
               },
@@ -1015,9 +1081,54 @@
             }
           },
           "position": {
-            "x": 9,
+            "x": 8,
             "y": 2,
-            "width": 3,
+            "width": 2,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "a98a1c5f",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "9670f773",
+                  "fields": [
+                    {
+                      "name": "avg(total_passengers)",
+                      "expression": "AVG(`total_passengers`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Total passengers",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg(total_passengers)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 10,
+            "y": 2,
+            "width": 2,
             "height": 4
           }
         }
