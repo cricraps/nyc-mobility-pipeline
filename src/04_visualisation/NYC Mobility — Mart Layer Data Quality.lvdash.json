@@ -1,0 +1,694 @@
+{
+  "datasets": [
+    {
+      "name": "12b783a8",
+      "displayName": "NYC Mobility Validation Mart Layer Dataset",
+      "queryLines": [
+        "SELECT * \n",
+        "FROM nyc_mobility.validation.mart_layer_quality;"
+      ]
+    },
+    {
+      "name": "c99dd465",
+      "displayName": "mart_pass",
+      "queryLines": [
+        "SELECT\n",
+        "    COUNT(*) AS pass_checks\n",
+        "FROM nyc_mobility.validation.mart_layer_quality\n",
+        "WHERE status = 'PASS';"
+      ]
+    },
+    {
+      "name": "6c1c3e0d",
+      "displayName": "mart_warn",
+      "queryLines": [
+        "SELECT\n",
+        "    COUNT(*) AS warn_checks\n",
+        "FROM nyc_mobility.validation.mart_layer_quality\n",
+        "WHERE status = 'WARN';"
+      ]
+    },
+    {
+      "name": "d2f6a50c",
+      "displayName": "mart_fail",
+      "queryLines": [
+        "SELECT\n",
+        "    COUNT(*) AS fail_checks\n",
+        "FROM nyc_mobility.validation.mart_layer_quality\n",
+        "WHERE status = 'FAIL';"
+      ]
+    },
+    {
+      "name": "75442601",
+      "displayName": "mart_total_checks",
+      "queryLines": [
+        "SELECT\n",
+        "    COUNT(*) AS total_checks\n",
+        "FROM nyc_mobility.validation.mart_layer_quality;"
+      ]
+    },
+    {
+      "name": "2731cc80",
+      "displayName": "mart_checks_by_dataset",
+      "queryLines": [
+        "SELECT\n",
+        "    dataset,\n",
+        "    status,\n",
+        "    COUNT(*) AS check_count\n",
+        "FROM nyc_mobility.validation.mart_layer_quality\n",
+        "GROUP BY\n",
+        "    dataset,\n",
+        "    status\n",
+        "ORDER BY\n",
+        "    dataset,\n",
+        "    status;"
+      ]
+    },
+    {
+      "name": "4d6cba54",
+      "displayName": "mart_status_distribution",
+      "queryLines": [
+        "SELECT\n",
+        "    status,\n",
+        "    COUNT(*) AS checks\n",
+        "FROM nyc_mobility.validation.mart_layer_quality\n",
+        "GROUP BY status;"
+      ]
+    },
+    {
+      "name": "4ad8cc3d",
+      "displayName": "mart_checks_by_type",
+      "queryLines": [
+        "SELECT\n",
+        "    data_quality_check,\n",
+        "    COUNT(*) AS check_count\n",
+        "FROM nyc_mobility.validation.mart_layer_quality\n",
+        "GROUP BY data_quality_check\n",
+        "ORDER BY check_count DESC;"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "64e1e476",
+      "displayName": "NYC Mobility — Mart Layer Data Quality",
+      "layout": [
+        {
+          "widget": {
+            "name": "pass",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "c99dd465",
+                  "fields": [
+                    {
+                      "name": "sum(pass_checks)",
+                      "expression": "SUM(`pass_checks`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "<span style=\"text-align:center;display:block\"><span style=\"font-size: 36px;line-height: 1.5;\">PASS</span></span>",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "style": {
+                "fontColor": {
+                  "dark": "#2A9619"
+                }
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(pass_checks)",
+                  "style": {
+                    "fontSize": 80
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            },
+            "specExtensions": {
+              "widgetBorderColor": {
+                "dark": "#2A9619"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "9a17a040",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "6c1c3e0d",
+                  "fields": [
+                    {
+                      "name": "sum(warn_checks)",
+                      "expression": "SUM(`warn_checks`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "<span style=\"text-align:center;display:block\"><span style=\"font-size: 36px;line-height: 1.5;\">WARN</span></span>",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "style": {
+                "fontColor": {
+                  "dark": "#FFAB00"
+                }
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(warn_checks)",
+                  "style": {
+                    "fontSize": 80
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            },
+            "specExtensions": {
+              "widgetBorderColor": {
+                "dark": "#FFAB00"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 2,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "e1269fa4",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "d2f6a50c",
+                  "fields": [
+                    {
+                      "name": "sum(fail_checks)",
+                      "expression": "SUM(`fail_checks`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "<span style=\"text-align:center;display:block\"><span style=\"font-size: 36px;line-height: 1.5;\">FAIL</span></span>",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "style": {
+                "fontColor": {
+                  "dark": "#FF3621"
+                }
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(fail_checks)",
+                  "style": {
+                    "fontSize": 80
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            },
+            "specExtensions": {
+              "widgetBorderColor": {
+                "dark": "#FF3621"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 2,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "458daf91",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "75442601",
+                  "fields": [
+                    {
+                      "name": "sum(total_checks)",
+                      "expression": "SUM(`total_checks`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "<span style=\"text-align:center;display:block\"><span style=\"font-size: 36px;line-height: 1.5;\">TOTAL CHECKS</span></span>",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "style": {
+                "fontColor": {
+                  "dark": "#0D72D8"
+                }
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(total_checks)",
+                  "style": {
+                    "fontSize": 80
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            },
+            "specExtensions": {
+              "widgetBorderColor": {
+                "dark": "#0D72D8"
+              }
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 2,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "dq-checks-by-dataset",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2731cc80",
+                  "fields": [
+                    {
+                      "name": "status",
+                      "expression": "`status`"
+                    },
+                    {
+                      "name": "dataset",
+                      "expression": "`dataset`"
+                    },
+                    {
+                      "name": "sum(check_count)",
+                      "expression": "SUM(`check_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "**DQ Checks by Dataset**",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "dataset",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(check_count)",
+                  "displayName": "Number of Checks",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "status",
+                  "scale": {
+                    "type": "categorical",
+                    "mappings": [
+                      {
+                        "value": "FAIL",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 4
+                        }
+                      },
+                      {
+                        "value": "PASS",
+                        "color": "#2A9619"
+                      },
+                      {
+                        "value": "WARN",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 2
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 4,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "e035bb2a",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "4d6cba54",
+                  "fields": [
+                    {
+                      "name": "sum(checks)",
+                      "expression": "SUM(`checks`)"
+                    },
+                    {
+                      "name": "status",
+                      "expression": "`status`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "sum(checks)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "DQ Status Distribution"
+                },
+                "color": {
+                  "fieldName": "status",
+                  "scale": {
+                    "type": "categorical",
+                    "mappings": [
+                      {
+                        "value": "FAIL",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 4
+                        }
+                      },
+                      {
+                        "value": "PASS",
+                        "color": "#2A9619"
+                      }
+                    ]
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 6,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "ad7d09ec",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "4ad8cc3d",
+                  "fields": [
+                    {
+                      "name": "check_count",
+                      "expression": "`check_count`"
+                    },
+                    {
+                      "name": "data_quality_check",
+                      "expression": "`data_quality_check`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "mark": {
+                "colors": [
+                  "#0D72D8"
+                ]
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "check_count",
+                  "displayName": "Number of Checks",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "data_quality_check",
+                  "displayName": " ",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "x-reversed"
+                    }
+                  }
+                },
+                "label": {
+                  "show": false,
+                  "showTotal": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 7,
+            "y": 6,
+            "width": 5,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "mart-dq-issues",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "12b783a8",
+                  "fields": [
+                    {
+                      "name": "dataset",
+                      "expression": "`dataset`"
+                    },
+                    {
+                      "name": "column",
+                      "expression": "`column`"
+                    },
+                    {
+                      "name": "data_quality_check",
+                      "expression": "`data_quality_check`"
+                    },
+                    {
+                      "name": "failed_rows",
+                      "expression": "`failed_rows`"
+                    },
+                    {
+                      "name": "total_rows",
+                      "expression": "`total_rows`"
+                    },
+                    {
+                      "name": "percentage",
+                      "expression": "`percentage`"
+                    },
+                    {
+                      "name": "status",
+                      "expression": "`status`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "### `Mart DQ Issues`",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "dataset"
+                  },
+                  {
+                    "fieldName": "column"
+                  },
+                  {
+                    "fieldName": "data_quality_check"
+                  },
+                  {
+                    "fieldName": "failed_rows"
+                  },
+                  {
+                    "fieldName": "total_rows"
+                  },
+                  {
+                    "fieldName": "percentage"
+                  },
+                  {
+                    "fieldName": "status"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 12,
+            "width": 12,
+            "height": 9
+          }
+        },
+        {
+          "widget": {
+            "name": "60b0191f",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<span style=\"text-align:center;display:block;\"><span style=\"font-weight: 700;font-size: 48px;line-height: 1.5;\">NYC Mobility — Mart Layer Data Quality</span></span>"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "canvasBackgroundColor": {
+        "light": "#FAFAFB",
+        "dark": "#1F272D"
+      },
+      "widgetBackgroundColor": {
+        "light": "#FFFFFF",
+        "dark": "#11171C"
+      },
+      "fontColor": {
+        "light": "#11171C",
+        "dark": "#E8ECF0"
+      },
+      "selectionColor": {
+        "light": "#2272B4",
+        "dark": "#8ACAFF"
+      },
+      "visualizationColors": [
+        "#077A9D",
+        "#FFAB00",
+        "#00A972",
+        "#FF3621",
+        "#8BCAE7",
+        "#AB4057",
+        "#99DDB4",
+        "#FCA4A1",
+        "#919191",
+        "#BF7080"
+      ],
+      "widgetHeaderAlignment": "CENTER"
+    },
+    "applyModeEnabled": false
+  }
+}
