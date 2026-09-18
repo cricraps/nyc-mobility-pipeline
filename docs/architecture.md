@@ -4,6 +4,11 @@
 
 This document describes the **layered architecture** of the NYC Mobility data pipeline, following the **Bronze → Silver → Gold** (Medallion) design pattern, plus a dedicated **Validation** layer. Each layer represents a stage of data refinement, moving from raw ingested data (taxi trips, weather, zones, and traffic advisories) to clean, structured data, and finally to business-ready analytical models.
 
+<img width="773" height="412" alt="pipeline" src="https://github.com/user-attachments/assets/ad28807b-a3c5-4654-9e9f-d1a599770953" />
+
+
+
+
 ## Data Sources
 
 The pipeline ingests from multiple heterogeneous sources — trip records, weather, reference data, and traffic advisories — accessed in Databricks via a configured **Unity Catalog Volume**.
@@ -51,7 +56,7 @@ df = spark.read.parquet(
 
 ---
 
-## 🥈 Silver Layer — `02_clean/`
+## Silver Layer — `02_clean/`
 
 **Purpose:** Cleans, standardizes, and validates the raw data from the Bronze layer. This includes handling nulls, correcting data types, removing duplicates/invalid records, and applying consistent naming conventions across all four sources.
 
@@ -126,7 +131,7 @@ df = spark.read.parquet(
 
 ---
 
-## Data Flow Summary
+## Summary of Data Flow
 
 1. **Bronze (`01_raw`)** — Raw data lands as-is from four source types (green taxi Parquet, Open-Meteo weather API, taxi zone CSV, NYC DOT/Socrata traffic advisories) into the Unity Catalog Volume, with no modifications.
 2. **Silver (`02_clean`)** — Raw data from each source is cleaned, validated, and standardized independently.
