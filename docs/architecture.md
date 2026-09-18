@@ -1,4 +1,4 @@
-# 🚕 NYC Mobility Data Pipeline Architecture
+# NYC Mobility Data Pipeline Architecture
 
 ## Overview
 
@@ -29,7 +29,7 @@ df = spark.read.parquet(
 
 ---
 
-## 🥉 Bronze Layer — `01_raw/`
+## Bronze Layer — `01_raw/`
 
 **Purpose:** Ingests raw data directly from each source system (trip records, weather, zones, advisories) with **no transformation applied**. This layer is an exact, untouched copy of the source data — no cleaning, renaming, filtering, or restructuring — and acts as the single source of truth for raw records.
 
@@ -73,7 +73,7 @@ df = spark.read.parquet(
 
 ---
 
-## 🥇 Gold Layer — `03_mart/`
+## Gold Layer — `03_mart/`
 
 **Purpose:** Transforms cleaned data into a **dimensional model** (star schema) optimized for analytics and reporting. This layer contains dimension and fact tables joining trip, weather, zone, and advisory data.
 
@@ -95,7 +95,7 @@ df = spark.read.parquet(
 
 ---
 
-## 📊 Visualization Layer — `04_visualisation/`
+## Visualization Layer — `04_visualisation/`
 
 **Purpose:** Contains query logic that powers dashboards and reports, built on top of the Gold layer's dimensional model. These queries answer specific mobility, weather-impact, and traffic-incident questions.
 
@@ -110,7 +110,7 @@ df = spark.read.parquet(
 
 ---
 
-## ✅ Validation Layer — `05_validation/`
+## Validation Layer — `05_validation/`
 
 **Purpose:** Profiles and validates data quality across sources — checking completeness, freshness, and correctness before/after cleaning. Acts as a quality gate distinct from the Bronze/Silver/Gold transformation flow.
 
