@@ -108,11 +108,15 @@ Pattern:
 - `<layer_suffix>` — matches the folder's layer: `_raw` in `01_raw/`, `_clean` in `02_clean/`.
 - `<ext>` — `.py` for plain ingestion scripts, `.ipynb` for notebooks with mixed SQL/markdown/exploration. Prefer `.ipynb` once a step needs more than a single linear script; keep `.py` only for straightforward, non-interactive ingestion.
 
-**Known inconsistency to fix:** `01_green_taxi_raw.py.py` in `01_raw/` carries a duplicated `.py.py` extension. This is a naming defect, not an intentional convention — rename to `01_green_taxi_raw.py` the next time that file is touched.
-
 ### `00_setup`
 
 Setup files are named `<step>.<subject>.ipynb`, e.g. `00_setup.dbquery.ipynb` for the catalog/schema creation notebook. There is normally only one setup file per environment concern, so no sequence number is needed beyond the leading `00`.
+
+### `01_raw and 02_clean`
+
+Raw and clean files follow the same `<NN>_<table_name>.<ext>` pattern
+
+See: Table naming (Bronze & Silver layers)
 
 ### `03_mart`
 
