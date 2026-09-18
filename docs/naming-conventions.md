@@ -116,7 +116,7 @@ Setup files are named `<step>.<subject>.ipynb`, e.g. `00_setup.dbquery.ipynb` fo
 
 Raw and clean files follow the same `<NN>_<table_name>.<ext>` pattern
 
-See: Table naming (Bronze & Silver layers)
+See: [Table naming (Bronze & Silver layers)](https://github.com/cricraps/nyc-mobility-pipeline/edit/main/docs/naming-conventions.md#table-naming-bronze--silver-layers) for details in convention.
 
 ### `03_mart`
 
