@@ -1,8 +1,6 @@
 # Naming Conventions
 
-This document is the reference for how catalogs, schemas, storage volumes, repository folders, and files are named across the pipeline. Anything not covered here should follow the closest existing pattern rather than introducing a new one — raise a decision-log entry if a genuinely new pattern is needed.
-
-**Last updated:** 2026-09-18
+This document is the reference for how catalogs, schemas, storage volumes, repository folders, and files are named across the pipeline. Anything not covered here should follow the closest existing pattern rather than introducing a new one.
 
 ## Catalog
 
@@ -64,17 +62,6 @@ volume_path = "/Volumes/workspace/default/ftw-b12-r2/groups/week-08/group-f/gree
 
 **Convention:** every dataset gets its own trailing folder named after the dataset in `snake_case` (`green_taxi`, `weather`, `taxi_zones`, `traffic_advisory`). Do not nest multiple datasets under one shared folder — each gets its own path so retention, re-ingestion, and access can be scoped per source.
 
-## Repository folder structure
-
-```
-nyc-mobility-pipeline/
-└── src/
-    ├── 00_setup/
-    ├── 01_raw/
-    ├── 02_clean/
-    ├── 03_mart/
-    └── 04_visualisation/
-```
 
 | Folder | Layer | Contains |
 | --- | --- | --- |
@@ -108,11 +95,13 @@ Pattern:
 - `<layer_suffix>` — matches the folder's layer: `_raw` in `01_raw/`, `_clean` in `02_clean/`.
 - `<ext>` — `.py` for plain ingestion scripts, `.ipynb` for notebooks with mixed SQL/markdown/exploration. Prefer `.ipynb` once a step needs more than a single linear script; keep `.py` only for straightforward, non-interactive ingestion.
 
-**Known inconsistency to fix:** `01_green_taxi_raw.py.py` in `01_raw/` carries a duplicated `.py.py` extension. This is a naming defect, not an intentional convention — rename to `01_green_taxi_raw.py` the next time that file is touched.
-
 ### `00_setup`
 
 Setup files are named `<step>.<subject>.ipynb`, e.g. `00_setup.dbquery.ipynb` for the catalog/schema creation notebook. There is normally only one setup file per environment concern, so no sequence number is needed beyond the leading `00`.
+
+### `01_raw and 02_clean`
+
+Raw and clean files follow the same `<NN>_<table_name>.<ext>` pattern
 
 ### `03_mart`
 
