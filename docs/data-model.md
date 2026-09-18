@@ -1,23 +1,24 @@
 # NYC Mobility Pipeline — Data Model
 
-This document is the plain-language description of the Gold-layer (`nyc_mobility.mart`)
-dimensional model and how it answers the project's business questions. For field-level
-detail (types, nullability, business rules) see `docs/data_dictionary.md`.
+This document is about the dimensional model and how it answers the project's business questions. 
+For field-level detail (types, nullability, business rules) see `docs/data_dictionary.md`.
 
 **Catalog:** `nyc_mobility`
 **Sources:** NYC TLC Green Taxi, weather (`weather_silver`), NYC Taxi Zones, NYC traffic
 advisories
 
-## Star schema overview
+## Snowflake schema overview
 
-The model is a single-fact star schema: one fact table (`fact_trip`) surrounded by four
+<img width="1353" height="1012" alt="nyc mobility snowflake schema (1)" src="https://github.com/user-attachments/assets/528e7469-c48c-4f00-b832-70f5bc1f22e0" />
+
+
+The model is a snowflake schema: one fact table (`fact_trip`) surrounded by four
 dimension tables (`dim_zone`, `dim_date`, `dim_weather`, `dim_advisory`). `dim_zone` is
 used twice against `fact_trip` — once for pickup, once for drop-off — as a role-playing
 dimension. `dim_advisory` does not have a direct foreign key into `fact_trip`; it is
 joined at query time on `borough` and an effective-date range (see
 [Business questions and model usage](#business-questions-and-model-usage)).
 
-*(Insert the star-schema ERD here, e.g. `docs/model/nyc_mobility_star_schema.png`.)*
 
 | Gold table | Type | Grain | Key |
 |---|---|---|---|
@@ -82,14 +83,14 @@ joined at query time on `borough` and an effective-date range (see
 These are the questions implemented in `src/04_visualisation`, each materialized as its
 own table in `nyc_mobility.bi_visualization`:
 
-| ID | Business question | Fact / dims used | Output table | Suggested chart |
-|---|---|---|---|---|
-| Q1a | Which borough-to-borough flows carry the highest trip volume, distance, and revenue? | `fact_trip` joined to `dim_zone` twice (pickup + drop-off role) | `borough_flow_analytics` | Heatmap — rows: pickup borough, columns: drop-off borough, color: total trips |
-| Q1b | Which individual pickup zones drive the most trip volume and revenue? | `fact_trip` joined to `dim_zone` (pickup role) | `top_pickup_zones` | Horizontal bar — X: total trips, Y: pickup zone (top 10), color: pickup borough |
-| Q2 | How do passenger volume, fare amounts, and trip durations vary across hours of the day and weekends vs. weekdays? | `fact_trip` joined to `dim_date` on `pickup_date_hour_key` | `temporal_patterns_and_behaviors` | Line chart — X: pickup hour, Y: total trips, series/color: `is_weekend` |
-| Q3 | How do weather conditions (rain, snow, clear) impact trip demand, distance, and duration? | `fact_trip` joined to `dim_weather` on `pickup_date_hour_key` = `date_hour_key` | `weather_impact_analysis` | Combo chart — X: weather condition, bar (left Y): total trips, line (right Y): avg duration |
-| Q4 | Do traffic advisories correlate with changes in pickup volume or trip duration within impacted boroughs? | `fact_trip` joined to `dim_zone` (pickup role), left-joined to `dim_advisory` on borough + effective-date range | `traffic_advisory_and_incident_impact` | Grouped bar — X: borough, Y: avg duration minutes, color/group: advisory type |
-| — | Consolidated KPI summary (trips, passengers, revenue, avg fare, avg distance, avg duration, revenue/mile) | `fact_trip` only | `kpi_summary` | KPI banner |
+| ID | Business question | Fact / dims used | Output table 
+|---|---|---|---
+| Q1a | Which borough-to-borough flows carry the highest trip volume, distance, and revenue? | `fact_trip` joined to `dim_zone` twice (pickup + drop-off role) | `borough_flow_analytics`
+| Q1b | Which individual pickup zones drive the most trip volume and revenue? | `fact_trip` joined to `dim_zone` (pickup role) | `top_pickup_zones` 
+| Q2 | How do passenger volume, fare amounts, and trip durations vary across hours of the day and weekends vs. weekdays? | `fact_trip` joined to `dim_date` on `pickup_date_hour_key` | `temporal_patterns_and_behaviors` 
+| Q3 | How do weather conditions (rain, snow, clear) impact trip demand, distance, and duration? | `fact_trip` joined to `dim_weather` on `pickup_date_hour_key` = `date_hour_key` | `weather_impact_analysis` 
+| Q4 | Do traffic advisories correlate with changes in pickup volume or trip duration within impacted boroughs? | `fact_trip` joined to `dim_zone` (pickup role), left-joined to `dim_advisory` on borough + effective-date range | `traffic_advisory_and_incident_impact` 
+| — | Consolidated KPI summary (trips, passengers, revenue, avg fare, avg distance, avg duration, revenue/mile) | `fact_trip` only | `kpi_summary`
 
 ### How each question is built
 
