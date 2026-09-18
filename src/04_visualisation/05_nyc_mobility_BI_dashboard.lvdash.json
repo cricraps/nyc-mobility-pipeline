@@ -1,0 +1,1035 @@
+{
+  "datasets": [
+    {
+      "name": "17b6ee05",
+      "displayName": "1a Borough to Borough Trip Volume and Revenue Overview",
+      "queryLines": [
+        "\r\n",
+        "-- Question 1a: Which borough-to-borough flows carry the highest trip volume, distance, and revenue?\r\n",
+        "-- Suggested chart: Heatmap | Rows: pickup_borough | Columns: dropoff_borough | Color intensity: total_trips\r\n",
+        "\r\n",
+        "SELECT \r\n",
+        "    pz.borough AS pickup_borough,\r\n",
+        "    dz.borough AS dropoff_borough,\r\n",
+        "    COUNT(*) AS total_trips,\r\n",
+        "    ROUND(SUM(t.trip_distance), 2) AS total_distance_miles,\r\n",
+        "    ROUND(SUM(t.total_amount), 2) AS total_revenue\r\n",
+        "FROM nyc_mobility.mart.fact_trip AS t\r\n",
+        "JOIN nyc_mobility.mart.dim_zone AS pz \r\n",
+        "    ON t.pu_location_id = pz.location_id\r\n",
+        "JOIN nyc_mobility.mart.dim_zone AS dz \r\n",
+        "    ON t.do_location_id = dz.location_id\r\n",
+        "GROUP BY 1, 2\r\n",
+        "ORDER BY total_trips DESC;"
+      ]
+    },
+    {
+      "name": "8737d7b0",
+      "displayName": "1b Top Pickup Zones Ranked by Trips and Revenue Analysis",
+      "queryLines": [
+        "-- Question 1b: Which individual pickup zones drive the most trip volume and revenue?\r\n",
+        "-- Suggested chart: Horizontal bar | X: total_trips | Y: pickup_zone (top 10) | Color: pickup_borough\r\n",
+        "\r\n",
+        "SELECT \r\n",
+        "    pz.borough AS pickup_borough,\r\n",
+        "    pz.zone AS pickup_zone,\r\n",
+        "    COUNT(*) AS total_trips,\r\n",
+        "    ROUND(AVG(t.trip_distance), 2) AS avg_trip_distance_miles,\r\n",
+        "    ROUND(SUM(t.total_amount), 2) AS total_revenue\r\n",
+        "FROM nyc_mobility.mart.fact_trip AS t\r\n",
+        "JOIN nyc_mobility.mart.dim_zone AS pz \r\n",
+        "    ON t.pu_location_id = pz.location_id\r\n",
+        "GROUP BY pickup_borough, pickup_zone\r\n",
+        "ORDER BY total_trips DESC;"
+      ]
+    },
+    {
+      "name": "6b8fd6f1",
+      "displayName": "2 Trip Patterns by Hour and Day Type Analysis",
+      "queryLines": [
+        "-- Question 2: How do passenger volume, fare amounts, and trip durations vary across hours of the day and weekends vs. weekdays?\r\n",
+        "-- Suggested chart: Line chart | X: pickup_hour | Y: total_trips | Series/Color: is_weekend\r\n",
+        "\r\n",
+        "SELECT \r\n",
+        "    t.pickup_hour,\r\n",
+        "    d.is_weekend,\r\n",
+        "    COUNT(*) AS total_trips,\r\n",
+        "    SUM(t.passenger_count) AS total_passengers,\r\n",
+        "    ROUND(AVG(t.trip_duration_min), 2) AS avg_duration_minutes,\r\n",
+        "    ROUND(AVG(t.fare_amount), 2) AS avg_fare_amount\r\n",
+        "FROM nyc_mobility.mart.fact_trip AS t\r\n",
+        "JOIN nyc_mobility.mart.dim_date AS d \r\n",
+        "    ON t.pickup_date_hour_key = d.date_hour_key\r\n",
+        "GROUP BY t.pickup_hour, d.is_weekend\r\n",
+        "ORDER BY d.is_weekend, t.pickup_hour;"
+      ]
+    },
+    {
+      "name": "68b19bb3",
+      "displayName": "3 Weather Impact on Trip Demand and Duration Analysis",
+      "queryLines": [
+        "-- Question 3: How do weather conditions (rain, snow, clear) impact trip demand, distance, and duration?\r\n",
+        "-- Suggested chart: Combo (bar + line) | X: weather_condition | Bar (left Y): total_trips | Line (right Y): avg_duration_minutes\r\n",
+        "\r\n",
+        "SELECT \r\n",
+        "    CASE \r\n",
+        "        WHEN w.snowfall > 0 THEN 'Snow'\r\n",
+        "        WHEN w.precipitation > 0 THEN 'Rain/Precipitation'\r\n",
+        "        ELSE 'Clear/Dry'\r\n",
+        "    END AS weather_condition,\r\n",
+        "    ROUND(AVG(w.temperature_2m), 1) AS avg_temperature_c,\r\n",
+        "    COUNT(*) AS total_trips,\r\n",
+        "    ROUND(AVG(t.trip_distance), 2) AS avg_distance_miles,\r\n",
+        "    ROUND(AVG(t.trip_duration_min), 2) AS avg_duration_minutes\r\n",
+        "FROM nyc_mobility.mart.fact_trip AS t\r\n",
+        "JOIN nyc_mobility.mart.dim_weather AS w \r\n",
+        "    ON t.pickup_date_hour_key = w.date_hour_key\r\n",
+        "GROUP BY weather_condition\r\n",
+        "ORDER BY total_trips DESC;"
+      ]
+    },
+    {
+      "name": "c968467d",
+      "displayName": "4 Traffic Patterns Amid Advisory Changes in Boroughs",
+      "queryLines": [
+        "-- Question 4: Do traffic advisories correlate with changes in pickup volume or trip duration within impacted boroughs?\r\n",
+        "-- Suggested chart: Grouped bar | X: borough | Y: avg_duration_minutes | Color/Group: advisory_type\r\n",
+        "\r\n",
+        "WITH trip_advisory AS (\r\n",
+        "    SELECT \r\n",
+        "        t.pu_location_id,\r\n",
+        "        t.do_location_id,\r\n",
+        "        t.pickup_datetime,\r\n",
+        "        t.dropoff_datetime,\r\n",
+        "        z.borough,\r\n",
+        "        t.trip_duration_min,\r\n",
+        "        t.trip_distance,\r\n",
+        "        t.total_amount,\r\n",
+        "        a.advisory_type,\r\n",
+        "        ROW_NUMBER() OVER (\r\n",
+        "            PARTITION BY t.pu_location_id, t.do_location_id, t.pickup_datetime, t.dropoff_datetime\r\n",
+        "            ORDER BY a.effective_from DESC\r\n",
+        "        ) AS advisory_rank\r\n",
+        "    FROM nyc_mobility.mart.fact_trip AS t\r\n",
+        "    JOIN nyc_mobility.mart.dim_zone AS z\r\n",
+        "        ON t.pu_location_id = z.location_id\r\n",
+        "    LEFT JOIN nyc_mobility.mart.dim_advisory AS a\r\n",
+        "        ON LOWER(TRIM(a.borough)) = LOWER(TRIM(z.borough))\r\n",
+        "       AND t.pickup_datetime BETWEEN a.effective_from AND a.effective_to\r\n",
+        ")\r\n",
+        "SELECT \r\n",
+        "    borough,\r\n",
+        "    COALESCE(advisory_type, 'None') AS advisory_type,\r\n",
+        "    COUNT(*) AS total_trips,\r\n",
+        "    ROUND(AVG(trip_duration_min), 2) AS avg_duration_minutes,\r\n",
+        "    ROUND(AVG(total_amount), 2) AS avg_total_fare\r\n",
+        "FROM trip_advisory\r\n",
+        "WHERE advisory_rank = 1\r\n",
+        "GROUP BY borough, advisory_type\r\n",
+        "ORDER BY borough, advisory_type;"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "19dea7d7",
+      "displayName": "BI dashboard",
+      "layout": [
+        {
+          "widget": {
+            "name": "borough-flows",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "17b6ee05",
+                  "fields": [
+                    {
+                      "name": "sum(total_trips)",
+                      "expression": "SUM(`total_trips`)"
+                    },
+                    {
+                      "name": "dropoff_borough",
+                      "expression": "`dropoff_borough`"
+                    },
+                    {
+                      "name": "pickup_borough",
+                      "expression": "`pickup_borough`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "showDescription": false,
+                "title": {
+                  "value": "```\nborough-to-borough flows\n```",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "heatmap",
+              "encodings": {
+                "x": {
+                  "fieldName": "dropoff_borough",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "pickup_borough",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "color": {
+                  "fieldName": "sum(total_trips)",
+                  "scale": {
+                    "type": "quantitative",
+                    "colorRamp": {
+                      "mode": "single-hue",
+                      "baseColor": {
+                        "themeColorType": "visualizationColors",
+                        "position": 2
+                      }
+                    }
+                  }
+                },
+                "label": {
+                  "show": false
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "pickup-zones-by-total-trips",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "8737d7b0",
+                  "fields": [
+                    {
+                      "name": "pickup_borough",
+                      "expression": "`pickup_borough`"
+                    },
+                    {
+                      "name": "sum(total_trips)",
+                      "expression": "SUM(`total_trips`)"
+                    },
+                    {
+                      "name": "pickup_zone",
+                      "expression": "`pickup_zone`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "```\npickup zones by total trips\n```",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "sum(total_trips)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "pickup_zone",
+                  "scale": {
+                    "type": "categorical",
+                    "categorySize": {
+                      "type": "number-of-categories",
+                      "number": 10
+                    },
+                    "sort": {
+                      "by": "custom-order",
+                      "orderedValues": [
+                        "East Harlem North",
+                        "East Harlem South",
+                        "Forest Hills",
+                        "Morningside Heights",
+                        "Central Park",
+                        "Elmhurst",
+                        "Downtown Brooklyn/metrotech",
+                        "Central Harlem",
+                        "Fort Greene",
+                        "Jamaica",
+                        "Washington Heights South",
+                        "DUMBO/Vinegar Hill",
+                        "Central Harlem North",
+                        "Jackson Heights",
+                        "Astoria",
+                        "Elmhurst/maspeth",
+                        "Brooklyn Heights",
+                        "Kew Gardens",
+                        "Woodside",
+                        "Flushing",
+                        "Steinway",
+                        "Upper East Side North",
+                        "Hamilton Heights",
+                        "Bloomingdale",
+                        "Boerum Hill",
+                        "Flushing Meadows-corona Park",
+                        "Park Slope",
+                        "Coney Island",
+                        "Red Hook",
+                        "Maspeth",
+                        "Queensbridge/ravenswood",
+                        "Sheepshead Bay",
+                        "Crown Heights North",
+                        "Williamsburg (north Side)",
+                        "Manhattanville",
+                        "West Concourse",
+                        "Rego Park",
+                        "Canarsie",
+                        "Sunnyside",
+                        "Old Astoria",
+                        "Washington Heights North",
+                        "East New York",
+                        "Prospect-lefferts Gardens",
+                        "East Williamsburg",
+                        "Flatlands",
+                        "Brownsville",
+                        "Long Island City/hunters Point",
+                        "Stuyvesant Heights",
+                        "East Flatbush/remsen Village",
+                        "Highbridge",
+                        "Greenpoint",
+                        "Long Island City/queens Plaza",
+                        "East Flatbush/farragut",
+                        "Clinton Hill",
+                        "Flatbush/ditmas Park",
+                        "Inwood",
+                        "Yorkville West",
+                        "Melrose South",
+                        "Bedford",
+                        "East Concourse/concourse Village",
+                        "Mott Haven/port Morris",
+                        "Richmond Hill",
+                        "Ocean Hill",
+                        "Bushwick South",
+                        "University Heights/morris Heights",
+                        "Lenox Hill East",
+                        "Starrett City",
+                        "Upper West Side North",
+                        "Crown Heights South",
+                        "Saint Albans",
+                        "Corona",
+                        "Cobble Hill",
+                        "Williamsburg (south Side)",
+                        "South Ozone Park",
+                        "Queens Village",
+                        "Manhattan Valley",
+                        "East New York/pennsylvania Avenue",
+                        "Kips Bay",
+                        "Mount Hope",
+                        "Springfield Gardens North",
+                        "East Tremont",
+                        "South Jamaica",
+                        "Co-op City",
+                        "Brooklyn Navy Yard",
+                        "East Elmhurst",
+                        "Carroll Gardens",
+                        "Prospect Heights",
+                        "Kingsbridge Heights",
+                        "N/a",
+                        "Briarwood/jamaica Hills",
+                        "Morrisania/melrose",
+                        "Parkchester",
+                        "Murray Hill",
+                        "Van Nest/morris Park",
+                        "Marine Park/mill Basin",
+                        "Erasmus",
+                        "Soundview/castle Hill",
+                        "Williamsbridge/olinville",
+                        "Tribeca/civic Center",
+                        "Hillcrest/pomonok",
+                        "Bedford Park",
+                        "Eastchester",
+                        "Bay Ridge",
+                        "Two Bridges/seward Park",
+                        "Outside Of Nyc",
+                        "Ridgewood",
+                        "North Corona",
+                        "Van Cortlandt Village",
+                        "Baisley Park",
+                        "Bushwick North",
+                        "Spuyten Duyvil/kingsbridge",
+                        "Midwood",
+                        "Rosedale",
+                        "Saint Michaels Cemetery/woodside",
+                        "Norwood",
+                        "Claremont/bathgate",
+                        "Hollis",
+                        "Woodlawn/wakefield",
+                        "Laurelton",
+                        "Lincoln Square East",
+                        "Lenox Hill West",
+                        "Soundview/bruckner",
+                        "Jamaica Estates",
+                        "Financial District South",
+                        "Borough Park",
+                        "Springfield Gardens South",
+                        "Gramercy",
+                        "Kew Gardens Hills",
+                        "Lincoln Square West",
+                        "Bensonhurst East",
+                        "Sunset Park West",
+                        "Upper East Side South",
+                        "Clinton East",
+                        "Yorkville East",
+                        "Pelham Parkway",
+                        "Belmont",
+                        "Bellerose",
+                        "Cypress Hills",
+                        "Longwood",
+                        "Hunts Point",
+                        "Woodhaven",
+                        "Glendale",
+                        "Riverdale/north Riverdale/fieldston",
+                        "Homecrest",
+                        "East Chelsea",
+                        "Brighton Beach",
+                        "Financial District North",
+                        "Bronxdale",
+                        "Alphabet City",
+                        "Sunset Park East",
+                        "Kensington",
+                        "Westchester Village/unionport",
+                        "Gowanus",
+                        "Midtown East",
+                        "Garment District",
+                        "Fordham South",
+                        "Manhattan Beach",
+                        "Middle Village",
+                        "Murray Hill-queens",
+                        "Midtown Center",
+                        "Glen Oaks",
+                        "Times Sq/theatre District",
+                        "Union Sq",
+                        "Upper West Side South",
+                        "Allerton/pelham Gardens",
+                        "Prospect Park",
+                        "Cambria Heights",
+                        "Schuylerville/edgewater Park",
+                        "Un/turtle Bay South",
+                        "Chinatown",
+                        "Crotona Park East",
+                        "Madison",
+                        "Gravesend",
+                        "Bayside",
+                        "Seaport",
+                        "Midtown North",
+                        "Bensonhurst West",
+                        "Windsor Terrace",
+                        "LaGuardia Airport",
+                        "College Point",
+                        "East Flushing",
+                        "Flatiron",
+                        "Penn Station/madison Sq West",
+                        "East Village",
+                        "World Trade Center",
+                        "Sutton Place/turtle Bay North",
+                        "Clinton West",
+                        "West Farms/bronx River",
+                        "Queensboro Hill",
+                        "Bronx Park",
+                        "Highbridge Park",
+                        "South Williamsburg",
+                        "JFK Airport",
+                        "Midtown South",
+                        "Howard Beach",
+                        "Lower East Side",
+                        "West Chelsea/hudson Yards",
+                        "Marble Hill",
+                        "Saint George/new Brighton",
+                        "Pelham Bay",
+                        "Dyker Heights",
+                        "Whitestone",
+                        "Bay Terrace/fort Totten",
+                        "Fresh Meadows",
+                        "Willets Point",
+                        "Auburndale",
+                        "Columbia Street",
+                        "Ozone Park",
+                        "West Village",
+                        "Oakland Gardens",
+                        "Little Italy/nolita",
+                        "Greenwich Village North",
+                        "Bath Beach",
+                        "Van Cortlandt Park",
+                        "Douglaston",
+                        "Roosevelt Island",
+                        "Inwood Hill Park",
+                        "Ocean Parkway South",
+                        "Stuy Town/peter Cooper Village",
+                        "Randalls Island",
+                        "Hudson Sq",
+                        "Forest Park/highland Park",
+                        "City Island",
+                        "Battery Park City",
+                        "Greenwich Village South",
+                        "Country Club",
+                        "Crotona Park",
+                        "SoHo",
+                        "South Beach/dongan Hills",
+                        "Marine Park/floyd Bennett Field",
+                        "Broad Channel",
+                        "Hammels/arverne",
+                        "Astoria Park",
+                        "Stapleton",
+                        "Westerleigh",
+                        "Bloomfield/emerson Hill",
+                        "Charleston/tottenville",
+                        "Great Kills",
+                        "Port Richmond",
+                        "West Brighton",
+                        "Pelham Bay Park",
+                        "Far Rockaway"
+                      ]
+                    }
+                  }
+                },
+                "color": {
+                  "fieldName": "pickup_borough",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 6,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "total-trips-pickup-hour-weekdays-weekends",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "6b8fd6f1",
+                  "fields": [
+                    {
+                      "name": "is_weekend",
+                      "expression": "`is_weekend`"
+                    },
+                    {
+                      "name": "pickup_hour",
+                      "expression": "`pickup_hour`"
+                    },
+                    {
+                      "name": "sum(total_trips)",
+                      "expression": "SUM(`total_trips`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Total trips by pickup hour during weekdays and weekends",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "pickup_hour",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(total_trips)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "is_weekend",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": false
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 12,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "total-trips-by-weather-condition",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "68b19bb3",
+                  "fields": [
+                    {
+                      "name": "weather_condition",
+                      "expression": "`weather_condition`"
+                    },
+                    {
+                      "name": "total_trips",
+                      "expression": "`total_trips`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Total trips by weather condition",
+                  "fields": []
+                }
+              },
+              "version": 1,
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  }
+                ]
+              },
+              "widgetType": "combo",
+              "encodings": {
+                "x": {
+                  "fieldName": "weather_condition",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                },
+                "y": {
+                  "primary": {
+                    "fields": [
+                      {
+                        "fieldName": "total_trips"
+                      }
+                    ]
+                  },
+                  "secondary": {
+                    "fields": []
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 18,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "b781ea07",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "c968467d",
+                  "fields": [
+                    {
+                      "name": "advisory_type",
+                      "expression": "`advisory_type`"
+                    },
+                    {
+                      "name": "borough",
+                      "expression": "`borough`"
+                    },
+                    {
+                      "name": "sum(avg_duration_minutes)",
+                      "expression": "SUM(`avg_duration_minutes`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "```\ntraffic advisories in correlation with pickup volume and trip duration\n```",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "borough",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(avg_duration_minutes)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "advisory_type",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 24,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "average-trip-duration-by-weather-condition",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "68b19bb3",
+                  "fields": [
+                    {
+                      "name": "weather_condition",
+                      "expression": "`weather_condition`"
+                    },
+                    {
+                      "name": "avg_duration_minutes",
+                      "expression": "`avg_duration_minutes`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Average trip duration by weather condition",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  }
+                ]
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "weather_condition",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg_duration_minutes",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 18,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "9980c8c6",
+            "multilineTextboxSpec": {
+              "lines": [
+                "# <span style=\"text-align:center;display:block;\"><span style=\"font-size: 48px;line-height: 1.5;\">NYC Mobility BI Dashboard</span></span>"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "total-trips1",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "17b6ee05",
+                  "fields": [
+                    {
+                      "name": "sum(total_trips)",
+                      "expression": "SUM(`total_trips`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Total trips\n<p>&nbsp;</p>\n",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(total_trips)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "aa100558",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "17b6ee05",
+                  "fields": [
+                    {
+                      "name": "sum(total_revenue)",
+                      "expression": "SUM(`total_revenue`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Total revenue",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(total_revenue)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 2,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "f9a314e6",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "6b8fd6f1",
+                  "fields": [
+                    {
+                      "name": "avg(avg_fare_amount)",
+                      "expression": "AVG(`avg_fare_amount`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Average fare",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg(avg_fare_amount)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 2,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "7f5121d9",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "6b8fd6f1",
+                  "fields": [
+                    {
+                      "name": "avg(avg_duration_minutes)",
+                      "expression": "AVG(`avg_duration_minutes`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Average duration in minutes",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg(avg_duration_minutes)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 2,
+            "width": 3,
+            "height": 4
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
