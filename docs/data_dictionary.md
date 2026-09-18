@@ -1,12 +1,8 @@
-# Data Dictionary — NYC Mobility Pipeline (Mart / Gold Layer)
+# Data Dictionary
 
 This document describes the fields, grain, and lineage of every table published in the
-`nyc_mobility.mart` schema of the [`cricraps/nyc-mobility-pipeline`](https://github.com/cricraps/nyc-mobility-pipeline)
-project. It covers what each field means, where it comes from, its unit/format, and any
-rules or caveats a downstream user needs to know before joining or aggregating it — in line
-with the core elements a data dictionary should carry: variable name, a human-readable
-description, units/format, allowed values, and definition (per
-[Harvard HMS's Data Dictionary guidance](https://datamanagement.hms.harvard.edu/collect-analyze/documentation-metadata/data-dictionary)).
+`nyc_mobility.mart` schema. It covers what each field means, where it comes from, its unit/format, and any
+rules or caveats a downstream user needs to know before joining or aggregating it.
 
 ## Pipeline context
 
