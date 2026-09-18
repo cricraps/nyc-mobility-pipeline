@@ -1,12 +1,7 @@
-# Decision Log
+# Decisions 
 
-This document is the canonical record of data-profiling and engineering decisions made across the pipeline's four sources: **Green Taxi**, **Weather**, **Traffic Advisory**, and **Taxi Zones**. It records what was found during profiling, what was decided, why, and what the decision means for downstream layers.
+This document records what was found during profiling, what was decided, why, and what the decision means for downstream layers that was made across the pipeline's four sources: **Green Taxi**, **Weather**, **Traffic Advisory**, and **Taxi Zones**. 
 
-**Last updated:** 2026-09-18
-
-## Maintenance rule
-
-When a decision changes, update this file in the same pull request as the code change it affects. If a decision is superseded, mark the old entry as **Superseded** rather than deleting it, and link to the entry that replaces it.
 
 ## Sources
 
@@ -17,13 +12,13 @@ When a decision changes, update this file in the same pull request as the code c
 | Traffic Advisory | NYC DOT public traffic advisory web page (HTML, scraped) |
 | Taxi Zones | NYC TLC Taxi Zone Lookup Table |
 
-## D01: Platform
+## Use of Platform
 
-**Decision:** Use `ftw-r2` as the storage and processing environment. Use GitHub for version-controlled code and documentation.
+**Decision:** Use `ftw-b12-r2` as the storage and processing environment. Use GitHub for version-controlled code and documentation.
 
-**Reason:** `ftw-r2` is the assigned class storage environment for this project; introducing a second storage or processing platform would add setup and access risk without serving any approved requirement.
+**Reason:** `ftw-b12-r2` is the assigned class storage environment for this project; introducing a second storage or processing platform would add setup and access risk without serving any approved requirement.
 
-**Consequence:** All Bronze/Silver/Gold tables and Volumes for the four datasets above are built inside `ftw-r2`. Do not introduce another processing or storage platform without a new decision entry.
+**Consequence:** All Bronze/Silver/Gold tables and Volumes for the four datasets above are built inside `ftw-b12-r2`. Do not introduce another processing or storage platform without a new decision entry.
 
 ---
 
@@ -391,3 +386,21 @@ A quick-reference table of every profiling finding and its decision, grouped by 
 **Reason:** These rows represent real, expected sentinel members of the taxi zone lookup — used for pickups/dropoffs that don't map to a real taxi zone, such as a GPS ping recorded outside the five boroughs or a location geocoding couldn't resolve. They are not data-entry errors.
 
 **Consequence:** Any zone-based join or aggregation must treat these sentinel zones as legitimate "unknown/outside" members rather than filtering them out as bad data; doing so would silently drop trips that genuinely couldn't be mapped.
+
+## Snowflake Schema Decision
+**Finding:** Two fact tables were presented instead of the current one, making it a galaxy schema rather than a star schema because weather and trips do not have a key to connect with each other.  
+
+**Decision:** Use a snowflake schema for weather resolution instead of collapsing weather directly into a single weather key on the fact table. dim_weather joins to dim_zone on borough; dim_zone joins to fact_trip on location_id; the weather side of the join is completed with date and hour, joined straight from the existing columns already present on both sides rather than through an invented identifier. Pickup and drop-off weather are resolved separately, since a trip can have two different boroughs/hours for its origin and destination.
+
+**Reason:** Whenever two tables are being joined, the columns that already overlap between them should be checked first since there are fields that already exist on both the weather side and the zone/trip side — there's no need to generate a new primary key purely to force a join that natural columns already support.
+Keeping pickup and drop-off weather separate preserves the possibility that a trip's origin and destination fall in different boroughs with different conditions at different hours.
+
+**Consequence:** dim_weather and dim_zone must both carry borough in a matching, standardized format, or the join will silently drop or fan out rows — this should be validated before the join is trusted.
+fact_trip gains two weather relationships (pickup and drop-off), each resolved through dim_zone → dim_weather, not one flattened weather key.
+Because the schema is snowflaked, any query touching trip + weather now requires an explicit join through dim_zone, rather than a single-hop join straight from fact_trip to dim_weather.
+No new synthetic key should be introduced for this relationship unless a future profiling pass shows the natural borough/date/hour combination isn't sufficient to uniquely resolve a match.
+
+
+## Maintenance rule
+
+When a decision changes, update this file in the same pull request as the code change it affects. If a decision is superseded, mark the old entry as **Superseded** rather than deleting it, and link to the entry that replaces it.
