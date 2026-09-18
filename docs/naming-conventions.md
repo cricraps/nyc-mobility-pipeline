@@ -1,6 +1,6 @@
 # Naming Conventions
 
-This document is the reference for how catalogs, schemas, storage volumes, repository folders, and files are named across the pipeline. Anything not covered here should follow the closest existing pattern rather than introducing a new one — raise a decision-log entry if a genuinely new pattern is needed.
+This document is the reference for how catalogs, schemas, storage volumes, repository folders, and files are named across the pipeline. Anything not covered here should follow the closest existing pattern rather than introducing a new one.
 
 **Last updated:** 2026-09-18
 
