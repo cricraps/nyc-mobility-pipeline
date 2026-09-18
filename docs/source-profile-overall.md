@@ -116,6 +116,6 @@ A source is considered ready for downstream transformation only once its owner a
 - Documented anomalies, resolved or explicitly deferred
 - For APIs and scrapes specifically: how the source behaves on a bad request, and whether repeated calls are stable
 
-Green Taxi, Taxi Zones, Weather, and Traffic Advisory have cleared this gate, with two Green Taxi items (the distance cap and the VendorID-6 fare pattern) explicitly left open rather than resolved. 
+Green Taxi, Taxi Zones, Weather, and Traffic Advisory have cleared this gate.
 
-To see what decisions were made to the data findings, see https://github.com/cricraps/nyc-mobility-pipeline/blob/main/docs/decisions.md
+To see what decisions were made to the data findings, see [decisions.md](https://tinyurl.com/decisions-md)
