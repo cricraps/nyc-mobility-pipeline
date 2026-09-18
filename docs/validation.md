@@ -18,13 +18,10 @@ failed, `FAIL` at or above 5%.
 
 ## Green Taxi Dataset
 
-**Code:** [`src/05_validation/02_green_taxi_validation.ipynb`](https://github.com/cricraps/nyc-mobility-pipeline/blob/main/src/05_validation/02_green_taxi_validation.ipynb)
+**Validation query:** [`src/05_validation/02_green_taxi_validation.ipynb`](https://github.com/cricraps/nyc-mobility-pipeline/blob/main/src/05_validation/02_green_taxi_validation.ipynb)
 
-> I couldn't pull the actual cell contents into this doc — GitHub blocks automated
-> access to the raw notebook file, and the notebook viewer needs JS to render, both of
-> which are outside what I can fetch here. The link above goes straight to the file; if
-> you paste the cells (or export them as `.py`), I'll drop the real code into this
-> section instead of just linking it.
+
+
 
 ### Data Quality Findings
 
@@ -36,9 +33,6 @@ failed, `FAIL` at or above 5%.
 | `dropoff_before_pickup` | `lpep_dropoff_datetime` earlier than `lpep_pickup_datetime` | 1 | 0.001% | FAIL |
 | `month_boundary_trips` | Pickup on Feb 28 crossing into March | 8 | 0.006% | PASS |
 | `zero_duration_nonzero_distance` | Pickup and dropoff timestamps identical but `trip_distance` > 0 | 12 | 0.009% | WARN |
-
-> Transcribed from the check results screenshot — a couple of the longer descriptions
-> were cut off in the image, so double-check the exact wording in the notebook.
 
 **Why `ehail_fee_always_null` still passes.** A 100%-null column reads like a red flag,
 but green taxi trips never populate `ehail_fee` (it's an e-hail-specific field), so the
@@ -53,9 +47,7 @@ outright rather than being scored by percentage.
 
 ## Weather Dataset
 
-**Code:** [`src/05_validation/03_weather_validation`](https://github.com/cricraps/nyc-mobility-pipeline/tree/main/src/05_validation) (`.dbquery` file — writes to `nyc_mobility.validation.weather_validation`)
-
-### Data Hygiene (Silver Layer)
+### Data Hygiene 
 
 Rules enforced on `nyc_mobility.clean.weather_silver`:
 
@@ -246,7 +238,7 @@ ORDER BY
     failed_percentage DESC;
 ```
 
-### Summary
+### Weather data quality findings
 
 | Column | Dimension | Rule | If it trips |
 | --- | --- | --- | --- |
@@ -267,27 +259,12 @@ Status is computed per column against the shared thresholds (0% = PASS, <5% = WA
 FAIL), then the result set is sorted worst-first so any FAIL rows surface at the top of
 `nyc_mobility.validation.weather_validation`.
 
-> Note: exact `failed_rows` / `failed_percentage` values depend on a live run of the
-> query above — plug in the latest run's numbers here once you have them.
-
 ---
 
 ## Taxi Zones Dataset
 
-**Code:** [`src/05_validation/04_taxi_zones_validation.ipynb`](https://github.com/cricraps/nyc-mobility-pipeline/blob/main/src/05_validation/04_taxi_zones_validation.ipynb?short_path=36c320d)
+**Validation query:** [`src/05_validation/04_taxi_zones_validation.ipynb`](https://github.com/cricraps/nyc-mobility-pipeline/blob/main/src/05_validation/04_taxi_zones_validation.ipynb?short_path=36c320d)
 
-> Same caveat as green taxi — GitHub blocks automated fetches of the raw notebook, so
-> this section links the file rather than reproducing its cells. Send the code and I'll
-> replace the link with the real snippet.
-
-### Data Profiling Findings
-
-| Finding | Scale | Decision |
-| --- | --- | --- |
-| No nulls | 0% null | No action |
-| Duplicates in zone names | 3 / 265 | Retain — valid, since some locations cover large neighborhoods |
-| All columns are of correct data type | 4 / 4 | No action (still standardized for consistent formatting) |
-| `'Unknown'` and `'N/A'` in borough, zone, and service_zone | borough: 2/265, zone: 1/265, service_zone: 2/265 | Retain — records pickup/dropoff locations that don't map to a real taxi zone (e.g., a GPS ping outside the five boroughs, or a location geocoding couldn't resolve) |
 
 ### Data Quality Findings
 
@@ -310,20 +287,10 @@ as warnings so they stay visible.
 
 ## Traffic Advisory Dataset
 
-**Code:** [`src/05_validation/05_traffic_advisory_validation.ipynb`](https://github.com/cricraps/nyc-mobility-pipeline/blob/main/src/05_validation/05_traffic_advisory_validation.ipynb)
+**Validation query:** [`src/05_validation/05_traffic_advisory_validation.ipynb`](https://github.com/cricraps/nyc-mobility-pipeline/blob/main/src/05_validation/05_traffic_advisory_validation.ipynb)
 
-> Same caveat again — the raw notebook content isn't fetchable from here, so this is a
-> link plus the rule set documented on the repo's validations page, not the literal
-> code. Paste the cells in and I'll swap this for the real query.
 
-Summary of the checks documented for this dataset (source: [nyc-mobility-pipeline
-`docs/validations.md`](https://github.com/cricraps/nyc-mobility-pipeline/blob/main/docs/validations.md)),
-run after the raw and clean notebooks and written to
-`nyc_mobility.validation.traffic_advisory_validation` in the same shared shape used for
-weather: `column`, `data_quality_check`, `failed_rows`, `total_rows`, `percentage`,
-`status`.
-
-### Data Hygiene (Raw + Clean Layers)
+### Data Hygiene
 
 - **Completeness (raw):** the most recent scrape must land at least one row.
 - **Validity (raw):** the latest scrape should surface more than 20 distinct locations,
@@ -371,7 +338,3 @@ empty result over good data.
 **Proving idempotency.** Re-running the raw and clean notebooks a second time and
 re-running the validation notebook should produce identical row/key counts, with the
 second raw run inserting zero new rows.
-
-> Note: as with weather, this section documents the *rule set*, not a specific run's
-> numbers. Once the actual traffic advisory validation SQL is available, add its results
-> (`failed_rows` / `percentage` / `status`) the same way as the weather table.
