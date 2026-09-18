@@ -11,7 +11,7 @@ This document describes the **layered architecture** of the NYC Mobility data pi
 
 ## Data Sources
 
-The pipeline ingests from multiple heterogeneous sources — trip records, weather, reference data, and traffic advisories — accessed in Databricks via a configured **Unity Catalog Volume**.
+The pipeline ingests from multiple public sources — trip records, weather, reference data, and traffic advisories — accessed in Databricks via a configured **Unity Catalog Volume**.
 
 - **Volume path:** `/Volumes/workspace/default/ftw-b12-r2/groups/week-08/group-f`
 - **Ingestion method:** `read_files()` for file-based sources; REST/API calls and web scraping for external live sources, landed into the Volume before being loaded into raw tables
