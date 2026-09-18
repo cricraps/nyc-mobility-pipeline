@@ -128,7 +128,7 @@
                 "showDescription": false,
                 "headerAlignment": "center",
                 "title": {
-                  "value": "## <span style=\"text-align:center;display:block\"><span style=\"font-size: 36px;line-height: 1.5;\">PASS</span></span>",
+                  "value": "<span style=\"text-align:center;display:block\"><span style=\"font-size: 36px;line-height: 1.5;\">PASS</span></span>",
                   "fields": []
                 }
               },
@@ -141,11 +141,19 @@
               "widgetType": "counter",
               "encodings": {
                 "value": {
-                  "fieldName": "sum(pass_checks)"
+                  "fieldName": "sum(pass_checks)",
+                  "style": {
+                    "fontSize": 80
+                  }
                 }
               },
               "data": {
                 "queryName": "main_query"
+              }
+            },
+            "specExtensions": {
+              "widgetBorderColor": {
+                "dark": "#2A9619"
               }
             }
           },
@@ -153,7 +161,7 @@
             "x": 0,
             "y": 2,
             "width": 3,
-            "height": 3
+            "height": 4
           }
         },
         {
@@ -214,11 +222,19 @@
               "widgetType": "counter",
               "encodings": {
                 "value": {
-                  "fieldName": "sum(warn_checks)"
+                  "fieldName": "sum(warn_checks)",
+                  "style": {
+                    "fontSize": 80
+                  }
                 }
               },
               "data": {
                 "queryName": "main_query"
+              }
+            },
+            "specExtensions": {
+              "widgetBorderColor": {
+                "dark": "#FFAB00"
               }
             }
           },
@@ -226,7 +242,7 @@
             "x": 3,
             "y": 2,
             "width": 3,
-            "height": 3
+            "height": 4
           }
         },
         {
@@ -265,11 +281,19 @@
               "widgetType": "counter",
               "encodings": {
                 "value": {
-                  "fieldName": "sum(fail_checks)"
+                  "fieldName": "sum(fail_checks)",
+                  "style": {
+                    "fontSize": 80
+                  }
                 }
               },
               "data": {
                 "queryName": "main_query"
+              }
+            },
+            "specExtensions": {
+              "widgetBorderColor": {
+                "dark": "#FF3621"
               }
             }
           },
@@ -277,7 +301,7 @@
             "x": 6,
             "y": 2,
             "width": 3,
-            "height": 3
+            "height": 4
           }
         },
         {
@@ -315,11 +339,19 @@
               "widgetType": "counter",
               "encodings": {
                 "value": {
-                  "fieldName": "sum(total_checks)"
+                  "fieldName": "sum(total_checks)",
+                  "style": {
+                    "fontSize": 80
+                  }
                 }
               },
               "data": {
                 "queryName": "main_query"
+              }
+            },
+            "specExtensions": {
+              "widgetBorderColor": {
+                "dark": "#0D72D8"
               }
             }
           },
@@ -327,7 +359,7 @@
             "x": 9,
             "y": 2,
             "width": 3,
-            "height": 3
+            "height": 4
           }
         },
         {
@@ -344,12 +376,12 @@
                       "expression": "`status`"
                     },
                     {
-                      "name": "dataset",
-                      "expression": "`dataset`"
-                    },
-                    {
                       "name": "sum(check_count)",
                       "expression": "SUM(`check_count`)"
+                    },
+                    {
+                      "name": "dataset",
+                      "expression": "`dataset`"
                     }
                   ],
                   "disaggregated": false
@@ -361,16 +393,16 @@
               "widgetType": "bar",
               "encodings": {
                 "x": {
-                  "fieldName": "dataset",
-                  "scale": {
-                    "type": "categorical"
-                  }
-                },
-                "y": {
                   "fieldName": "sum(check_count)",
                   "displayName": "Number of Checks",
                   "scale": {
                     "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "dataset",
+                  "scale": {
+                    "type": "categorical"
                   }
                 },
                 "color": {
@@ -401,7 +433,7 @@
           },
           "position": {
             "x": 0,
-            "y": 5,
+            "y": 6,
             "width": 6,
             "height": 6
           }
@@ -475,7 +507,7 @@
           },
           "position": {
             "x": 6,
-            "y": 5,
+            "y": 6,
             "width": 6,
             "height": 6
           }
@@ -565,7 +597,7 @@
           },
           "position": {
             "x": 0,
-            "y": 11,
+            "y": 12,
             "width": 12,
             "height": 9
           }
