@@ -87,7 +87,6 @@ flowchart LR
     Q1 --> Q2 --> Q3
 ```
 
-> A rendered PNG of the diagram can also be kept at `docs/images/pipeline.png` and embedded here if preferred.
 
 ### Layers
 
@@ -130,14 +129,9 @@ Full detail: [`docs/architecture.md`](docs/architecture.md)
 
 The Gold layer is a **snowflake-style dimensional model**: one fact table (`fact_trip`) and four dimensions. `dim_zone` is a **role-playing dimension** joined twice (pickup and drop-off). `dim_advisory` has no foreign key on the fact; it is joined at query time on borough and an effective-date range.
 
-```mermaid
-erDiagram
-    DIM_ZONE     ||--o{ FACT_TRIP : "pickup zone (pu_location_id)"
-    DIM_ZONE     ||--o{ FACT_TRIP : "drop-off zone (do_location_id)"
-    DIM_DATE     ||--o{ FACT_TRIP : "pickup_date_hour_key"
-    DIM_WEATHER  ||--o{ FACT_TRIP : "pickup_date_hour_key"
-    DIM_ADVISORY }o..o{ DIM_ZONE  : "borough + effective dates (query time)"
-```
+<img width="1353" height="985" alt="image" src="https://github.com/user-attachments/assets/6105826b-edad-4d1a-ad9a-253db98f02e3" />
+
+
 
 | Gold table     | Type      | Grain                                                   | Key                                                       |
 | -------------- | --------- | ------------------------------------------------------- | --------------------------------------------------------- |
@@ -440,7 +434,7 @@ Use this checklist before handing the pipeline to another team or maintainer.
 **Access and environment**
 
 - [ ] New owner has access to the `ftw-b12-r2` environment, the `nyc_mobility` catalog, and the approved Volume path.
-- [ ] Credentials and keys (Databricks tokens, weather/traffic API keys, R2) are transferred out-of-band — none exist in the repo, commit history, or notebook outputs.
+- [ ] Credentials and keys (weather/traffic API keys, R2) are transferred — none exist in the repo, commit history, or notebook outputs.
 
 **Code**
 
@@ -459,7 +453,6 @@ Use this checklist before handing the pipeline to another team or maintainer.
 
 - [ ] `architecture.md`, `data-model.md`, `data_dictionary.md`, `decisions.md`, and `validation.md` match what the code does today.
 - [ ] Any changed grain, key, or business question is reflected in `data-model.md` and `data_dictionary.md`.
-- [ ] Superseded decisions are marked **Superseded** and linked to their replacement.
 
 **Open items to hand over**
 
