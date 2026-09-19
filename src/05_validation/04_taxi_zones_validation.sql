@@ -136,12 +136,12 @@ UNION ALL
 SELECT
     'borough', 
     'validity',
-    COUNT_IF(f.borough IN ('Unknown', 'N/A')),
+    COUNT_IF(f.borough IN ('Unknown', 'N/A', 'N/a')),
     MAX(t.n),
-    ROUND(COUNT_IF(f.borough IN ('Unknown', 'N/A')) * 100.0 / MAX(t.n), 2),
+    ROUND(COUNT_IF(f.borough IN ('Unknown', 'N/A', 'N/a')) * 100.0 / MAX(t.n), 2),
     CASE 
-        WHEN COUNT_IF(f.borough IN ('Unknown', 'N/A')) * 100.0 / MAX(t.n) > 5 THEN 'FAIL'
-        WHEN COUNT_IF(f.borough IN ('Unknown', 'N/A')) > 0 THEN 'WARN' 
+        WHEN COUNT_IF(f.borough IN ('Unknown', 'N/A', 'N/a')) * 100.0 / MAX(t.n) > 5 THEN 'FAIL'
+        WHEN COUNT_IF(f.borough IN ('Unknown', 'N/A', 'N/a')) > 0 THEN 'WARN' 
         ELSE 'PASS' 
     END
 FROM flagged f 
@@ -152,11 +152,11 @@ UNION ALL
 SELECT
     'borough', 
     'validity',
-    COUNT_IF(f.borough IS NOT NULL AND f.borough NOT IN ('Manhattan','Brooklyn','Queens','Bronx','Staten Island','EWR','Unknown','N/A')),
+    COUNT_IF(f.borough IS NOT NULL AND f.borough NOT IN ('Manhattan','Brooklyn','Queens','Bronx','Staten Island','EWR','Unknown','N/A', 'N/a')),
     MAX(t.n),
-    ROUND(COUNT_IF(f.borough IS NOT NULL AND f.borough NOT IN ('Manhattan','Brooklyn','Queens','Bronx','Staten Island','EWR','Unknown','N/A')) * 100.0 / MAX(t.n), 2),
+    ROUND(COUNT_IF(f.borough IS NOT NULL AND f.borough NOT IN ('Manhattan','Brooklyn','Queens','Bronx','Staten Island','EWR','Unknown','N/A', 'N/a')) * 100.0 / MAX(t.n), 2),
     CASE 
-        WHEN COUNT_IF(f.borough IS NOT NULL AND f.borough NOT IN ('Manhattan','Brooklyn','Queens','Bronx','Staten Island','EWR','Unknown','N/A')) > 0 THEN 'FAIL' 
+        WHEN COUNT_IF(f.borough IS NOT NULL AND f.borough NOT IN ('Manhattan','Brooklyn','Queens','Bronx','Staten Island','EWR','Unknown','N/A', 'N/a')) > 0 THEN 'FAIL' 
         ELSE 'PASS' 
     END
 FROM flagged f 
@@ -228,12 +228,12 @@ UNION ALL
 SELECT
     'service_zone', 
     'validity',
-    COUNT_IF(f.service_zone IN ('Unknown', 'N/A')),
+    COUNT_IF(f.service_zone IN ('Unknown', 'N/A', 'N/a')),
     MAX(t.n),
-    ROUND(COUNT_IF(f.service_zone IN ('Unknown', 'N/A')) * 100.0 / MAX(t.n), 2),
+    ROUND(COUNT_IF(f.service_zone IN ('Unknown', 'N/A', 'N/a')) * 100.0 / MAX(t.n), 2),
     CASE 
-        WHEN COUNT_IF(f.service_zone IN ('Unknown', 'N/A')) * 100.0 / MAX(t.n) > 5 THEN 'FAIL'
-        WHEN COUNT_IF(f.service_zone IN ('Unknown', 'N/A')) > 0 THEN 'WARN' 
+        WHEN COUNT_IF(f.service_zone IN ('Unknown', 'N/A', 'N/a')) * 100.0 / MAX(t.n) > 5 THEN 'FAIL'
+        WHEN COUNT_IF(f.service_zone IN ('Unknown', 'N/A', 'N/a')) > 0 THEN 'WARN' 
         ELSE 'PASS' 
     END
 FROM flagged f 
@@ -243,11 +243,11 @@ CROSS JOIN totals t
 UNION ALL
 SELECT
     'service_zone', 'validity',
-    COUNT_IF(f.service_zone IS NOT NULL AND f.service_zone NOT IN ('Yellow Zone','Boro Zone','Airports','EWR','Unknown','N/A')),
+    COUNT_IF(f.service_zone IS NOT NULL AND f.service_zone NOT IN ('Yellow Zone','Boro Zone','Airports','EWR','Unknown','N/A', 'N/a')),
     MAX(t.n),
-    ROUND(COUNT_IF(f.service_zone IS NOT NULL AND f.service_zone NOT IN ('Yellow Zone','Boro Zone','Airports','EWR','Unknown','N/A')) * 100.0 / MAX(t.n), 2),
+    ROUND(COUNT_IF(f.service_zone IS NOT NULL AND f.service_zone NOT IN ('Yellow Zone','Boro Zone','Airports','EWR','Unknown','N/A', 'N/a')) * 100.0 / MAX(t.n), 2),
     CASE 
-        WHEN COUNT_IF(f.service_zone IS NOT NULL AND f.service_zone NOT IN ('Yellow Zone','Boro Zone','Airports','EWR','Unknown','N/A')) > 0 THEN 'FAIL' 
+        WHEN COUNT_IF(f.service_zone IS NOT NULL AND f.service_zone NOT IN ('Yellow Zone','Boro Zone','Airports','EWR','Unknown','N/A', 'N/a')) > 0 THEN 'FAIL' 
         ELSE 'PASS' 
     END
 FROM flagged f 
