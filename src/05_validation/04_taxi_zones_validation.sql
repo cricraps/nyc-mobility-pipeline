@@ -13,6 +13,8 @@
 -- - Any percentage > 5% → FAIL (even for placeholders)
 -- - Truly invalid values (not in expected list, excluding placeholders) → always FAIL
 
+--
+
 WITH raw AS (
     SELECT 
         LocationID, 
